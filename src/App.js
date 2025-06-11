@@ -15,7 +15,8 @@ function App() {
     setInput('');
 
     // Call OpenAI (this will be hooked up soon)
-    const response = await fetch('http://localhost:5000/api/ask', {
+    const response = await fetch('https://flora-backend-i620.onrender.com/api/ask', {
+
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: input }),
