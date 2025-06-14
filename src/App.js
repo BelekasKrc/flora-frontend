@@ -7,6 +7,7 @@ function App() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [avatar, setAvatar] = useState('female'); // Default avatar
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -20,7 +21,7 @@ function App() {
       const response = await fetch('https://yourfloraassistant.onrender.com/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input })
+        body: JSON.stringify({ message: input }),
       });
 
       const data = await response.json();
@@ -41,19 +42,40 @@ function App() {
       <div className="bg-red-600 text-white text-center py-4 text-2xl font-bold shadow">
         Flōra AI
       </div>
+
+      {/* Avatar picker */}
+      <div className="flex justify-center space-x-4 py-2 bg-red-100">
+        <button
+          className={`px-4 py-2 rounded ${avatar === 'male' ? 'bg-red-600 text-white' : 'bg-white'}`}
+          onClick={() => setAvatar('male')}
+        >
+          👨 Male
+        </button>
+        <button
+          className={`px-4 py-2 rounded ${avatar === 'female' ? 'bg-red-600 text-white' : 'bg-white'}`}
+          onClick={() => setAvatar('female')}
+        >
+          👩 Female
+        </button>
+      </div>
+
       <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4">
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm shadow ${
+            className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm shadow flex items-center space-x-2 ${
               msg.sender === 'you' ? 'bg-red-600 text-white self-end' : 'bg-gray-200 text-black self-start'
             }`}
           >
-            {msg.text}
+            {msg.sender === 'flora' && (
+              <span className="text-2xl">{avatar === 'male' ? '👨' : '👩'}</span>
+            )}
+            <span>{msg.text}</span>
           </div>
         ))}
         {loading && <div className="text-gray-500 text-sm">Flōra is typing...</div>}
       </div>
+
       <div className="p-4 bg-white shadow-md flex items-center">
         <input
           type="text"
