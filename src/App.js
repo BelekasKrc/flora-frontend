@@ -17,16 +17,17 @@ function App() {
   useEffect(() => {
     fetch('https://yourfloraassistant.onrender.com/api/greeting')
       .then(res => res.json())
-      .then(data => setMessages([{ sender: 'flora', text: data.greeting }]))
+      .then(data => setMessages([{ sender: 'flora', text: data.greeting.trim() }]))
       .catch(() =>
         setMessages([{ sender: 'flora', text: "Hey there 🌼 I'm Flōra. What's on your mind today?" }])
       );
   }, []);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    const trimmedInput = input.trim();
+    if (!trimmedInput || loading) return;
 
-    const newMessages = [...messages, { sender: 'you', text: input }];
+    const newMessages = [...messages, { sender: 'you', text: trimmedInput }];
     setMessages(newMessages);
     setInput('');
     setLoading(true);
@@ -35,11 +36,11 @@ function App() {
       const response = await fetch('https://yourfloraassistant.onrender.com/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ message: trimmedInput }),
       });
 
       const data = await response.json();
-      setMessages(prev => [...prev, { sender: 'flora', text: data.reply }]);
+      setMessages(prev => [...prev, { sender: 'flora', text: data.reply.trim() }]);
     } catch (err) {
       setMessages(prev => [...prev, { sender: 'flora', text: 'Error talking to Flora.' }]);
     } finally {
@@ -48,7 +49,10 @@ function App() {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') sendMessage();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      sendMessage();
+    }
   };
 
   return (
@@ -60,6 +64,7 @@ function App() {
       {/* Avatar picker */}
       <div className="flex justify-center space-x-4 py-2 bg-red-100">
         <button
+          type="button"
           className={`px-4 py-2 rounded ${avatar === 'male' ? 'bg-red-600 text-white' : 'bg-white'}`}
           onClick={() => setAvatar('male')}
           aria-label="Select Male Avatar"
@@ -67,6 +72,7 @@ function App() {
           👨 Male
         </button>
         <button
+          type="button"
           className={`px-4 py-2 rounded ${avatar === 'female' ? 'bg-red-600 text-white' : 'bg-white'}`}
           onClick={() => setAvatar('female')}
           aria-label="Select Female Avatar"
@@ -86,14 +92,20 @@ function App() {
             {msg.sender === 'flora' && (
               <span className="text-2xl">{avatar === 'male' ? '👨' : '👩'}</span>
             )}
-            <span>{msg.text}</span>
+            <span>{msg.text.trim()}</span>
           </div>
         ))}
         {loading && <div className="text-gray-500 text-sm">Flōra is typing...</div>}
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 bg-white shadow-md flex items-center">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          sendMessage();
+        }}
+        className="p-4 bg-white shadow-md flex items-center"
+      >
         <input
           type="text"
           className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -102,15 +114,17 @@ function App() {
           onKeyDown={handleKeyDown}
           placeholder="Ask Flōra..."
           aria-label="Message input"
+          disabled={loading}
         />
         <button
-          onClick={sendMessage}
-          className="ml-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm"
+          type="submit"
+          disabled={loading}
+          className="ml-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="Send message"
         >
           Send
         </button>
-      </div>
+      </form>
     </div>
   );
 }
