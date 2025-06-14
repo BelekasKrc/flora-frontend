@@ -1,13 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 function App() {
-  const [messages, setMessages] = useState([
-    { sender: 'flora', text: "Hey there 🌼 I'm Flōra. What's on your mind today?" }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [avatar, setAvatar] = useState('female'); // Default avatar
+  const messagesEndRef = useRef(null);
+
+  // Scroll chat to bottom on new message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Fetch initial greeting from backend on mount
+  useEffect(() => {
+    fetch('https://yourfloraassistant.onrender.com/api/greeting')
+      .then(res => res.json())
+      .then(data => setMessages([{ sender: 'flora', text: data.greeting }]))
+      .catch(() =>
+        setMessages([{ sender: 'flora', text: "Hey there 🌼 I'm Flōra. What's on your mind today?" }])
+      );
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -48,12 +62,14 @@ function App() {
         <button
           className={`px-4 py-2 rounded ${avatar === 'male' ? 'bg-red-600 text-white' : 'bg-white'}`}
           onClick={() => setAvatar('male')}
+          aria-label="Select Male Avatar"
         >
           👨 Male
         </button>
         <button
           className={`px-4 py-2 rounded ${avatar === 'female' ? 'bg-red-600 text-white' : 'bg-white'}`}
           onClick={() => setAvatar('female')}
+          aria-label="Select Female Avatar"
         >
           👩 Female
         </button>
@@ -74,6 +90,7 @@ function App() {
           </div>
         ))}
         {loading && <div className="text-gray-500 text-sm">Flōra is typing...</div>}
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="p-4 bg-white shadow-md flex items-center">
@@ -84,10 +101,12 @@ function App() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Ask Flōra..."
+          aria-label="Message input"
         />
         <button
           onClick={sendMessage}
           className="ml-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm"
+          aria-label="Send message"
         >
           Send
         </button>
