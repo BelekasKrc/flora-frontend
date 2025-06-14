@@ -90,6 +90,13 @@ const response = await fetch('https://yourfloraassistant.onrender.com/api/ask', 
   body: JSON.stringify({ message: input }),
 });
 
+  body: JSON.stringify({ message: input }),
+});
+
+const data = await response.json();
+setMessages(prev => [...prev, { from: 'ai', text: data.reply }]);
+
+
 
     const data = await response.json();
     setMessages(prev => [...prev, { sender: 'flora', text: data.reply }]);
