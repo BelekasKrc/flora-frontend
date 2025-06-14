@@ -8,7 +8,7 @@ function App() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSend = async () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
 
     const newMessages = [...messages, { sender: 'you', text: input }];
@@ -33,7 +33,7 @@ function App() {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') handleSend();
+    if (e.key === 'Enter') sendMessage();
   };
 
   return (
@@ -64,7 +64,7 @@ function App() {
           placeholder="Ask Flōra..."
         />
         <button
-          onClick={handleSend}
+          onClick={sendMessage}
           className="ml-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm"
         >
           Send
